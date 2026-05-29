@@ -108,7 +108,3 @@ This project was created to practice:
 * System tray support
 
 ---
-
-## License
-
-This project is licensed under the MIT License.
