@@ -18,5 +18,19 @@ timer_label = tk.Label(
 
 timer_label.pack(pady=50)
 
+
+# Time Input
+time_entry = tk.Entry(
+    root,
+    font=("Arial", 16),
+    justify="center"
+)
+
+time_entry.pack()
+
+# Placeholder text
+time_entry.insert(0, "Enter seconds")
+
+
 # Start application
 root.mainloop()
