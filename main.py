@@ -7,7 +7,7 @@ from tkinter import messagebox
 
 root = tk.Tk()
 root.title("Desktop Countdown Timer")
-root.geometry("450x320")
+root.geometry("500x350")
 root.resizable(False, False)
 
 # =========================
@@ -18,11 +18,11 @@ time_left = 0
 running = False
 
 # =========================
-# FUNCTIONS
+# HELPER FUNCTIONS
 # =========================
 
 def format_time(seconds):
-    """Convert seconds to HH:MM:SS"""
+    """Convert total seconds to HH:MM:SS"""
     hours = seconds // 3600
     minutes = (seconds % 3600) // 60
     secs = seconds % 60
@@ -30,17 +30,67 @@ def format_time(seconds):
     return f"{hours:02}:{minutes:02}:{secs:02}"
 
 
+def parse_time(time_string):
+    """
+    Convert HH:MM:SS input into total seconds.
+    Example:
+    01:30:15 -> 5415
+    """
+
+    parts = time_string.split(":")
+
+    if len(parts) != 3:
+        raise ValueError
+
+    hours = int(parts[0])
+    minutes = int(parts[1])
+    seconds = int(parts[2])
+
+    if hours < 0:
+        raise ValueError
+
+    if minutes < 0 or minutes > 59:
+        raise ValueError
+
+    if seconds < 0 or seconds > 59:
+        raise ValueError
+
+    return hours * 3600 + minutes * 60 + seconds
+
+
+# =========================
+# PLACEHOLDER FUNCTIONS
+# =========================
+
+def clear_placeholder(event):
+    if time_entry.get() == "HH:MM:SS":
+        time_entry.delete(0, tk.END)
+        time_entry.config(fg="black")
+
+
+def add_placeholder(event):
+    if time_entry.get().strip() == "":
+        time_entry.insert(0, "HH:MM:SS")
+        time_entry.config(fg="gray")
+
+
+# =========================
+# TIMER FUNCTIONS
+# =========================
+
 def update_timer():
-    """Update timer every second"""
     global time_left, running
 
     timer_label.config(text=format_time(time_left))
 
     if running and time_left > 0:
+
         time_left -= 1
+
         root.after(1000, update_timer)
 
     elif running and time_left == 0:
+
         running = False
 
         pause_button.config(text="Pause")
@@ -52,7 +102,6 @@ def update_timer():
 
 
 def start_timer():
-    """Start timer"""
     global time_left, running
 
     if not running:
@@ -62,19 +111,19 @@ def start_timer():
             try:
                 value = time_entry.get().strip()
 
-                if value == "" or value == "Enter seconds":
+                if value == "" or value == "HH:MM:SS":
                     raise ValueError
 
-                time_left = int(value)
+                time_left = parse_time(value)
 
-                if time_left < 0:
+                if time_left <= 0:
                     raise ValueError
 
             except ValueError:
 
                 messagebox.showerror(
                     "Invalid Input",
-                    "Please enter a valid positive number."
+                    "Please enter time in HH:MM:SS format.\n\nExample:\n01:30:00"
                 )
 
                 return
@@ -87,7 +136,6 @@ def start_timer():
 
 
 def pause_timer():
-    """Pause or Resume timer"""
     global running
 
     if running:
@@ -108,7 +156,6 @@ def pause_timer():
 
 
 def reset_timer():
-    """Reset timer"""
     global running, time_left
 
     running = False
@@ -116,11 +163,11 @@ def reset_timer():
 
     timer_label.config(text="00:00:00")
 
-    time_entry.delete(0, tk.END)
-    time_entry.insert(0, "Enter seconds")
-    time_entry.config(fg="gray")
-
     pause_button.config(text="Pause")
+
+    time_entry.delete(0, tk.END)
+    time_entry.insert(0, "HH:MM:SS")
+    time_entry.config(fg="gray")
 
 
 # =========================
@@ -133,7 +180,7 @@ title_label = tk.Label(
     font=("Arial", 20, "bold")
 )
 
-title_label.pack(pady=10)
+title_label.pack(pady=15)
 
 # =========================
 # TIMER DISPLAY
@@ -142,10 +189,22 @@ title_label.pack(pady=10)
 timer_label = tk.Label(
     root,
     text="00:00:00",
-    font=("Arial", 42, "bold")
+    font=("Consolas", 42, "bold")
 )
 
 timer_label.pack(pady=20)
+
+# =========================
+# INPUT LABEL
+# =========================
+
+input_label = tk.Label(
+    root,
+    text="Enter Time (HH:MM:SS)",
+    font=("Arial", 11)
+)
+
+input_label.pack()
 
 # =========================
 # INPUT FIELD
@@ -155,57 +214,59 @@ time_entry = tk.Entry(
     root,
     font=("Arial", 16),
     justify="center",
-    width=15
+    width=15,
+    fg="gray"
 )
-def clear_placeholder(event):
-    if time_entry.get() == "Enter seconds":
-        time_entry.delete(0, tk.END)
-        time_entry.config(fg="black")
 
+time_entry.pack(pady=10)
 
-def add_placeholder(event):
-    if time_entry.get() == "":
-        time_entry.insert(0, "Enter seconds")
-        time_entry.config(fg="gray")
-
+time_entry.insert(0, "HH:MM:SS")
 
 time_entry.bind("<FocusIn>", clear_placeholder)
 time_entry.bind("<FocusOut>", add_placeholder)
 
-time_entry.pack()
-
-time_entry.insert(0, "Enter seconds")
-
-
 # =========================
-# BUTTONS
+# BUTTON FRAME
 # =========================
 
 button_frame = tk.Frame(root)
+
 button_frame.pack(pady=25)
+
+# =========================
+# START BUTTON
+# =========================
 
 start_button = tk.Button(
     button_frame,
     text="Start",
-    width=10,
+    width=12,
     command=start_timer
 )
 
 start_button.grid(row=0, column=0, padx=5)
 
+# =========================
+# PAUSE / RESUME BUTTON
+# =========================
+
 pause_button = tk.Button(
     button_frame,
     text="Pause",
-    width=10,
+    width=12,
     command=pause_timer
 )
 
 pause_button.grid(row=0, column=1, padx=5)
 
+# =========================
+# RESET BUTTON
+# =========================
+
 reset_button = tk.Button(
     button_frame,
     text="Reset",
-    width=10,
+    width=12,
     command=reset_timer
 )
 
