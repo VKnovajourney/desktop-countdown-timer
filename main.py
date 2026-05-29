@@ -31,6 +31,18 @@ time_entry.pack()
 # Placeholder text
 time_entry.insert(0, "Enter seconds")
 
+def start_timer():
+    print("Start button clicked!")
+
+# Start Button
+start_button = tk.Button(
+    root,
+    text="Start",
+    font=("Arial", 14),
+    command=start_timer
+)
+
+start_button.pack(pady=20)
 
 # Start application
 root.mainloop()
